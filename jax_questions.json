@@ -1657,6 +1657,14 @@
         "link": "https://stackoverflow.com/questions/75318282/why-is-this-jax-jitted-function-so-much-slower-than-the-non-jitted-jax-version"
     },
     {
+        "title": "jax minimization with stochastically estimated gradients",
+        "question": "I'm trying to use the bfgs optimizer from tensorflow_probability.substrates.jax and from jax.scipy.optimize.minimize to minimize a function f which is estimated from pseudo-random samples and has a jax.random.PRNGKey as argument. To use this function with the jax/tfp bfgs minimizer, I wrap the function inside a lambda function\nseed = 100\nkey  = jax.random.PRNGKey(seed)\nfun = lambda x: return f(x,key)\nresult = jax.scipy.optimize.minimize(fun = fun, ...)\nWhat is the best way to update the key when the minimization routine calls the function to be minimized so that I use different pseudo-random numbers in a reproducible way? Maybe a global key variable? If yes, is there an example I could follow?\nSecondly, is there a way to make the optimization stop after a certain amount of time, as one could do with a callback in scipy? I could directly use the scipy implementation of bfgs/ l-bfgs-b/ etc and use jax ony for the estimation of the function and of tis gradients, which seems to work. Is there a difference between the scipy, jax.scipy and tfp.jax bfgs implementations?\nFinally, is there a way to print the values of the arguments of fun during the bfgs optimization in jax.scipy or tfp, given that f is jitted?\nThank you!",
+        "answers": [
+            "There is no way to do what you're asking with jax.scipy.optimize.minimize, because the minimizer does not offer any means to track changing state between function calls, and does not provide for any inbuilt stochasticity in the optimizer.\nIf you're interested in stochastic optimization in JAX, you might try stochastic optimization in JAXOpt, which provides a much more flexible set of optimization routines.\nRegarding your second question, if you'd like to print values during the course of a jit-compiled optimization or other loop, you can use jax.debug.print."
+        ],
+        "link": "https://stackoverflow.com/questions/75237021/jax-minimization-with-stochastically-estimated-gradients"
+    },
+    {
         "title": "jax automatic differentiation",
         "question": "I have the following three functions implements in JAX.\ndef helper_1(params1):\n   ...calculations...\n   return z\n\ndef helper_2(z, params2):\n   ...calculations...\n   return y\n\ndef main(params1, params2):\n   z = helper_1(params1)\n   y = helper_2(z, params2)\n   return z,y\nI am interested in the partial derivatives of the output from main, i.e. z and y, with respect to both params1 and params2. As params1 and params2 are low dimensional and z and y are high dimensional, I am using the jax.jacfwd function.\nWhen calling\njax.jacfwd(main,argnums=(0,1))(params1,params2)\nJax computes the derivatives of z with respect to params1 (and params2, which in this case is just a bunch of zeros). My question is: does Jax recompute dz/d_param1 for the derivatives of y with respect to params1 and params2, or does it somehow figure out this has already been computed?\nI don't know if this is relevant, but the 'helper_1' function contains functions from the TensorFlow library for Jax. Thanks!",
         "answers": [
@@ -2604,6 +2612,25 @@
         "link": "https://stackoverflow.com/questions/70356126/is-there-a-module-to-convert-a-tensorflow-nn-to-jax"
     },
     {
+        "title": "Fastest way to multiply and sum 4D array with 2D array in python?",
+        "question": "Here's my problem. I have two matrices A and B, with complex entries, of dimensions (n,n,m,m) and (n,n) respectively.\nBelow is the operation I perform to get a matrix C -\nC = np.sum(B[:,:,None,None]*A, axis=(0,1))\nComputing the above once takes about 6-8 seconds. Since I have to compute many such Cs, it takes a lot of time. Is there a faster way to do this? (I'm doing these using JAX NumPy on a multi-core CPU; normal NumPy takes even longer)\nn=77 and m=512, if you are wondering. I can parallelize as I'm working on a cluster, but the sheer size of the arrays consumes a lot of memory.",
+        "answers": [
+            "It looks like you want einsum:\nC = np.einsum('ijkl,ij->kl', A, B)\nWith numpy on a Colab CPU I get this:\nimport numpy as np\nx = np.random.rand(50, 50, 500, 500)\ny = np.random.rand(50, 50)\n\ndef f1(x, y):\n  return np.sum(y[:,:,None,None]*x, axis=(0,1))\n\ndef f2(x, y):\n  return np.einsum('ijkl,ij->kl', x, y)\n\nnp.testing.assert_allclose(f1(x, y), f2(x, y))\n\n%timeit f1(x, y)\n# 1 loop, best of 5: 1.52 s per loop\n%timeit f2(x, y)\n# 1 loop, best of 5: 620 ms per loop"
+        ],
+        "link": "https://stackoverflow.com/questions/70394566/fastest-way-to-multiply-and-sum-4d-array-with-2d-array-in-python"
+    },
+    {
+        "title": "Is there a module to convert a tensorflow NN to Jax?",
+        "question": "There is a libary to convert Jax functions to Tensorflow functions. Is there a similar library to convert TensorFlow functions to Jax functions?",
+        "answers": [
+            "No, there is no library supported by the JAX team to convert tensorflow into JAX in a manner similar to how jax.experimental.jax2tf converts JAX code to tensorflow, and I have not seen any such library developed by others.",
+            "See https://github.com/google/jax/blob/main/jax/experimental/jax2tf/README.md.\n\"jax2tf.call_tf: for using TensorFlow functions in a JAX context, e.g., to call a TensorFlow library or a SavedModel inside a JAX function.\"\nThat is what you need. So you can call tf function under jax context.\nfor example:\n# Compute cos with TF and sin with JAX\ndef cos_tf_sin_jax(x):\n  return jax.numpy.sin(jax2tf.call_tf(cos_tf)(x))",
+            "Is https://github.com/google-deepmind/tf2jax what you were looking for? It only works for TF v2 though.",
+            "To my knowledge there is no library similar to the one you mentioned to convert TensorFlow functions to Jax functions. I'm sorry"
+        ],
+        "link": "https://stackoverflow.com/questions/70356126/is-there-a-module-to-convert-a-tensorflow-nn-to-jax"
+    },
+    {
         "title": "Automatic Differentiation with respect to rank-based computations",
         "question": "I'm new to automatic differentiation programming, so this maybe a naive question. Below is a simplified version of what I'm trying to solve.\nI have two input arrays - a vector A of size N and a matrix B of shape (N, M), as well a parameter vector theta of size M. I define a new array C(theta) = B * theta to get a new vector of size N. I then obtain the indices of elements that fall in the upper and lower quartile of C, and use them to create a new array A_low(theta) = A[lower quartile indices of C] and A_high(theta) = A[upper quartile indices of C]. Clearly these two do depend on theta, but is it possible to differentiate A_low and A_high w.r.t theta?\nMy attempts so far seem to suggest no - I have using the python libraries of autograd, JAX and tensorflow, but they all return a gradient of zero. (The approaches I have tried so far involve using argsort or extracting the relevant sub-arrays using tf.top_k.)\nWhat I'm seeking help with is either a proof that the derivative is not defined (or cannot be analytically computed) or if it does exist, a suggestion on how to estimate it. My eventual goal is to minimize some function f(A_low, A_high) wrt theta.",
         "answers": [
@@ -2816,15 +2843,6 @@
             "First of all, the easiest way to do an element-wise sum is to use the built-in broadcasting of binary operations, and call sum2(X, Y) directly.\nThat said, if you're trying to understand vmap: the issue is that vmap can only map one axis at a time. If you want to map multiple axes, you can nest multiple vmaps. I believe what you intended to do can be expressed this way:\nfrom jax import vmap\nimport jax.numpy as np\n\nX = np.arange(9).reshape(3,3)\nY = np.arange(0,-9,-1).reshape(3,3)\n\ndef sum2(x,y):\n    assert x.ndim == y.ndim == 0\n    return x + y\n\nvmap(vmap(sum\n  vmap(sum2, in_axes=(0, 0), out_axes=0),\n  in_axes=(1, 1), out_axes=1\n)(X,Y)\nNote: I added the assertion about number of dimensions to demonstrate that the mapped function is being called on scalar values.\nAlso, notice that when the mapped axes match, e.g. in_axes=(0, 0) can be equivalently written in_axes=0, but I left it as a tuple because it was closer to the syntax you were trying.\nIn fact, a far more concise way to do the same computation with nested vmap would be to use the default arguments: vmap(vmap(sum2))(X, Y) will do the same elementwise sum."
         ],
         "link": "https://stackoverflow.com/questions/68332924/sum-matrix-elementwise-using-vmap-jax"
-    },
-    {
-        "title": "Not able to import python package jax in Google TPU",
-        "question": "I am working on linux console and typing python takes me into the python console. When I use the following command in TPU machine\nimport jax\nthen it generates following mss and get out of the python prompt.\nparamjeetsingh80@t1v-n-1c883486-w-0:~$ python3\nPython 3.8.5 (default, Jan 27 2021, 15:41:15)\n[GCC 9.3.0] on linux\nType \"help\", \"copyright\", \"credits\" or \"license\" for more information.\n>>> import jax\n2021-07-08 17:41:39.660523: F external/org_tensorflow/tensorflow/core/tpu/tpu_executor_init_fns.inc:110] TpuTransferManager_ReadDynamicShapes not available in this library.\nAborted (core dumped)\nparamjeetsingh80@t1v-n-1c883486-w-0:~$\nThis issue is causing problem in my code so I would like to figure out, what is this issue and how to get rid of this?",
-        "answers": [
-            "It may be that your system does not have the correct version of libtpu. Try installing the version listed here.\nYou should be able to do this automatically with\n$ pip install -U pip  # older pip may not support extra requirements\n$ pip install -U jax  # newer jax required for [tpu] extras declaration\n$ pip install jax[tpu] -f https://storage.googleapis.com/jax-releases/jax_releases.html",
-            "Above command give some error but I researched and below command worked for me. But your answer give me the direction that it is a package issue.\npip install --upgrade pip\npip install \"jax[tpu]>=0.2.16\" -f https://storage.googleapis.com/jax-releases/libtpu_releases.html"
-        ],
-        "link": "https://stackoverflow.com/questions/68306484/not-able-to-import-python-package-jax-in-google-tpu"
     },
     {
         "title": "Jax - autograd of a sigmoid always returns nan",
