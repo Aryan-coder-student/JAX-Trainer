@@ -1,5 +1,13 @@
 [
     {
+        "title": "DIfference in variable values in jax non-jit runtime and jit transformed runtime",
+        "question": "I have a deep learning mode which I am running in the jit transformed manner by:\nmy_function_checked = checkify.checkify(model.apply)\n    model_jitted = jax.jit(my_function_checked)\n    err, pred = model_jitted({\"params\": params}, batch, training=training, rng=rng)\n    err.throw()\nThe code is compiling fine, but now I want to debug the intermediate values after every few steps, save the arrays, and then compare them with pytorch tensors. For this, I need to repeatedly save the arrays. The easiest way to do this is to use any IDE's inbuilt debugger and evaluate the save expression after every few steps. But jax.jit transformed code doesn't allow external debuggers. But, I can do this after disabling the jit. Should I be expecting any discrepancies between the two runs? Can I assume that the values in jit and non-jit runs will remain same?",
+        "answers": [
+            "In general when comparing the same JAX operation with and without JIT, you should expect equivalence up to typical floating point rounding errors, but you should not expect bitwise equivalence."
+        ],
+        "link": "https://stackoverflow.com/questions/79571227/difference-in-variable-values-in-jax-non-jit-runtime-and-jit-transformed-runtime"
+    },
+    {
         "title": "Reproducibility of JAX calculations",
         "question": "I am using JAX in running Reinforcement Learning (RL) & Multi-Agent Reinforcement Learning (MARL) calculations. I have noticed the following behaviour:\nIn RL, my results are always fully reproducible.\nIn MARL, where computations become significantly heavier, my results are reprodicible when running on CPU.\nHowever, when running MARL in GPU I encounter a different behaviour. I have noticed that repeating the same calculation within a script execution leads to identical results. However, executing the same script twice leads to different results. The latter problem is only mitigated when I use:\nos.environ[\"XLA_FLAGS\"] = \"--xla_gpu_deterministic_ops\"\nos.environ[\"JAX_DISABLE_MOST_FASTER_PATHS\"] = \"1\"\nUnfortunately, this measure significantly reduces the computation speed.\nAny idea about dealing with this issue?",
         "answers": [
