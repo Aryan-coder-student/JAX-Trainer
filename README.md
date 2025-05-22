@@ -105,5 +105,5 @@ Want to support additional tags (`numpy`, `flax`, `optax`) or integrate other da
 
 ## 🙋‍♂️ Maintainer
 
-Built with ❤️ by [@Aryan-coder-studen](https://github.com/Aryan-coder-studen)
+Built with ❤️ by [@Aryan-coder-student](https://github.com/Aryan-coder-student)
 
