@@ -55,10 +55,8 @@
 ## 🛠️ Local Setup
 
 ```bash
-git clone https://github.com/<your-username>/JAX-Trainer.git
+git clone https://github.com/Aryan-coder-student/JAX-Trainer.git
 cd JAX-Trainer
-pip install -r requirements.txt  # if applicable
-python script.py
 ```
 
 ---
