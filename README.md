@@ -20,7 +20,7 @@
 
 ## 🔧 Features
 
-- ✅ Scrapes JAX-tagged questions (`jax`, `jaxlib`) from Stack Overflow
+- ✅ Scrapes JAX-tagged questions (`jax`) from Stack Overflow
 - ✅ Filters questions with accepted answers
 - ✅ Automatically runs daily with GitHub Actions
 - ✅ Stores results in `jax_questions.json` (overwrite/update mode)
